@@ -2,10 +2,9 @@ import time
 import copy
 from ipywidgets import Output
 from matplotlib.widgets import Button, CheckButtons
-from matplotlib.transforms import Bbox
 from matplotlib.patches import FancyArrowPatch
 from lab_utils_common import np, plt, dlblue, dlorange, sigmoid, dldarkred, gradient_descent
-
+plt.ion()
 # for debug
 #output = Output() # sends hidden error messages to display when using widgets
 #display(output)
@@ -176,14 +175,22 @@ class plt_one_addpt_onclick:
         #print(f"xy     : {bcid.rectangles[0].get_xy()}")
         #print(f"bb     : {bcid.rectangles[0].get_bbox()}")
         #print(f"points : {bcid.rectangles[0].get_bbox().get_points()}")  #[[xmin,ymin],[xmax,ymax]]
-        
-        bbox = bcid.ax.get_window_extent()
-        new_height = bbox.height * 3
-        new_bbox = Bbox([[bbox.x0, bbox.y0], [bbox.x1, bbox.y0 + new_height]])
-        bcid.ax.set_position([new_bbox.x0, new_bbox.y0, new_bbox.width, new_bbox.height])
 
-
-
+        # Kiểm tra nếu 'rectangles' không tồn tại thì tạo mới
+        if not hasattr(bcid, 'rectangles') or len(bcid.rectangles) == 0:
+            # Tạo mới các rectangles nếu không có
+            ax = bcid.ax
+            # Giả sử chúng ta tạo một rectangle cho mỗi checkbox
+            for label in bcid.labels:
+                rect = ax.add_patch(plt.Rectangle((0, 0), 1, 1, color='lightgray', alpha=0.5))
+                bcid.rectangles = [rect]
+        if len(bcid.rectangles) > 0:
+            try:
+                h = bcid.rectangles[0].get_height()  # Lấy chiều cao của rectangle
+                bcid.rectangles[0].set_height(3 * h)  # Điều chỉnh chiều cao
+                ymax = bcid.rectangles[0].get_bbox().y1
+            except Exception as e:
+                print(f"Error adjusting rectangle size: {e}")
 
         # h = bcid.rectangles[0].get_height()
         # bcid.rectangles[0].set_height(3*h)
